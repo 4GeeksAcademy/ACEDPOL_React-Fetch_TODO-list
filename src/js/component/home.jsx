@@ -35,7 +35,7 @@ const Home = () => {
 			if (!task) { 
 				throw new Error("El task no puede estar vacío"); 
 			}
-			const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
+			const response = await fetch("https://playground.4geeks.com/todo/todos/acedpool", {
 				method: 'POST',
 				body: JSON.stringify({
 					"label": task,
@@ -119,7 +119,7 @@ const Home = () => {
 			<ul className='list-group'>
 				{listTasks.map((task, index) => (
 					<li key={index} className='list-group-item rounded-0 border border-top-0 text-black text-opacity-50 text-start d-flex align-items-center task-item'>
-						{task}
+						{JSON.stringify(task)}
 						<button onClick={() => deleteTask(task)} className='btn ms-auto text-black text-opacity-50 border-0 task-button'><i className="fa-solid fa-x"></i></button>
 					</li>
 				))}
