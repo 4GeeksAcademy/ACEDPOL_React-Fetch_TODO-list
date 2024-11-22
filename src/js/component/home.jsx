@@ -10,58 +10,70 @@ const Home = () => {
 	const [inputValue, setInputValue] = useState("");
 	const [listTasks, setListTasks] = useState([]);
 
-	const createUser = async () => {
-		const response = await fetch("https://playground.4geeks.com/todo/users/acedpol", {
-			method: 'POST',
-			// body: JSON.stringify(dataToSend),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
-			headers: {
-			   'Content-Type': 'application/json'
-			}
-		});
-		if (response.ok) {
-			const data = await response.json();
-			return data;
-		} else {
-			console.log('error: ', response.status, response.statusText);
-			/* Realiza el tratamiento del error que devolvió el request HTTP */
-			return {error: {status: response.status, statusText: response.statusText}};
-		};
-	};
+	// const createUser = async () => {
+	// 	const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
+	// 		method: 'POST',
+	// 		// body: JSON.stringify(dataToSend),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
+	// 		headers: {
+	// 		   'Content-Type': 'application/json'
+	// 		}
+	// 	});
+	// 	if (response.ok) {
+	// 		const data = await response.json();
+	// 		return data;
+	// 	} else {
+	// 		console.log('error: ', response.status, response.statusText);
+	// 		/* Realiza el tratamiento del error que devolvió el request HTTP */
+	// 		return {error: {status: response.status, statusText: response.statusText}};
+	// 	};
+	// };
 
 	const createTask = async (task) => {
-		const response = await fetch("https://playground.4geeks.com/todo/users/acedpol", {
-			method: 'POST',
-			body: JSON.stringify({
-				label: task,
-				is_done: false
-			}),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
-			headers: {
-			   'Content-Type': 'application/json'
+		try { 
+			console.log("task: ", task)
+			// Verificar que el task no esté vacío 
+			if (!task) { 
+				throw new Error("El task no puede estar vacío"); 
 			}
-		});
-		if (response.ok) {
-			const data = await response.json();
-			// getUserData();
-			return data;
-		} else {
-			console.log('error: ', response.status, response.statusText);
-			/* Realiza el tratamiento del error que devolvió el request HTTP */
-			return {error: {status: response.status, statusText: response.statusText}};
-		};
+			const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
+				method: 'POST',
+				body: JSON.stringify({
+					"label": task,
+					"is_done": false
+				}),
+				headers: {
+				'Content-Type': 'application/json'
+				}
+			});
+			if (response.ok) {
+				const data = await response.json();
+				console.log(response.json());
+				setListTasks(prevState => [...prevState, { label: task, is_done: false}]);
+				return data;
+			} else {
+				console.log(response);
+				console.log('error: ', response.status, response.statusText);
+				/* Realiza el tratamiento del error que devolvió el request HTTP */
+				return {error: {status: response.status, statusText: response.statusText}};
+			};
+		} catch (error) { 
+			console.error('Error en createTask: ', error); 
+			return {error: {message: error.message}}; 
+		}
 	};
 
 	const getUserData = async () => {
-		const response = await fetch("https://playground.4geeks.com/todo/users/acedpol", {
+		const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
 			method: 'GET',
-			// body: JSON.stringify(dataToSend),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
 			headers: {
 			   'Content-Type': 'application/json'
 			}
 		});
 		if (response.ok) {
 			const data = await response.json();
-			// setListTasks(prevState => [...prevState, data.todos])
-			console.log(data);
+			// setListTasks(data.todos);
+			console.log(data.todos);
+			console.log(listTasks);
 		} else {
 			console.log('error: ', response.status, response.statusText);
 			/* Realiza el tratamiento del error que devolvió el request HTTP */
@@ -70,25 +82,26 @@ const Home = () => {
 	};
 
 	useEffect(() => {
-		createUser()
-		// getUserData()
-	},[])
+		// createUser()
+		getUserData()
+	}, [])
 
 	const handleOnChange = (e) => {
 		setInputValue(e.target.value);
-		// console.log(inputValue);
 	}
 
-	const saveTask = (e) => {
+	const saveTask = async (e) => {
 		e.preventDefault();
-		// setListTasks(prevState => [...prevState, inputValue.trim()])
-		createTask(inputValue.trim())
-		setInputValue("")
+		const result = await createTask(inputValue.trim()); 
+		if (!result.error) { 
+			setInputValue(""); 
+		} else { 
+			console.error("Error al crear la tarea: ", result.error); 
+		}
 	}
 
 	const deleteTask = (taskToDelete) => {
-		// console.log(taskToDelete.trim())
-		// setListTasks(listTasks.filter(task => task !== taskToDelete.trim()));
+		setListTasks(listTasks.filter(task => task !== taskToDelete.trim()));
 	}
 
 	return (
