@@ -30,7 +30,7 @@ const Home = () => {
 
 	const createTask = async (task) => {
 		try { 
-			console.log("task:",task)
+			// console.log("task:",task) // muestra el task que se a añadir
 			// Verificar que el task no esté vacío 
 			if (!task) { 
 				throw new Error("El task no puede estar vacío"); 
@@ -47,9 +47,9 @@ const Home = () => {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				console.log(data); // respuesta del servidor con la última entrada
+				// console.log(data); // respuesta del servidor con la última entrada
 				setListTasks(prevState => [...prevState, { label: data.label, is_done: data.is_done, id: data.id}]);
-				console.log(listTasks); // muestra el estado anterior a esta última entrada
+				// console.log(listTasks); // muestra el estado anterior a esta última entrada
 				return data;
 			} else {
 				console.log(response);
@@ -63,6 +63,25 @@ const Home = () => {
 		}
 	};
 
+	const deleteTaskID = async (ID) => {
+		const response = await fetch('https://playground.4geeks.com/todo/todos/' + ID, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		if (response.ok) {
+			// console.log(response)
+			// const data = await response.json();
+			setListTasks(listTasks.filter(task => task.id !== ID));
+			// return data;
+		} else {
+			console.log('error: ', response.status, response.statusText);
+			/* Realiza el tratamiento del error que devolvió el request HTTP */
+			return {error: {status: response.status, statusText: response.statusText}};
+		};
+	};
+
 	const getUserData = async () => {
 		const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
 			method: 'GET',
@@ -73,6 +92,7 @@ const Home = () => {
 		if (response.ok) {
 			const data = await response.json();
 			setListTasks(data.todos);
+			return data;
 		} else {
 			console.log('error: ', response.status, response.statusText);
 			/* Realiza el tratamiento del error que devolvió el request HTTP */
@@ -99,8 +119,13 @@ const Home = () => {
 		}
 	}
 
-	const deleteTask = (taskToDelete) => {
-		setListTasks(listTasks.filter(task => task !== taskToDelete.trim()));
+	const deleteTask = async (id_ToDelete) => {
+		const result = await deleteTaskID(id_ToDelete); 
+		// if (!result.error) { 
+		// 	setInputValue(""); 
+		// } else { 
+		// 	console.error("Error al eliminar la tarea: ", result.error); 
+		// }
 	}
 
 	return (
@@ -116,10 +141,10 @@ const Home = () => {
 				/>
 			</form>
 			<ul className='list-group'>
-				{listTasks.map((task, index) => (
-					<li key={index} className='list-group-item rounded-0 border border-top-0 text-black text-opacity-50 text-start d-flex align-items-center task-item'>
-						{JSON.stringify(task)}
-						<button onClick={() => deleteTask(task)} className='btn ms-auto text-black text-opacity-50 border-0 task-button'><i className="fa-solid fa-x"></i></button>
+				{listTasks.map((task) => (
+					<li key={task.id} className='list-group-item rounded-0 border border-top-0 text-black text-opacity-50 text-start d-flex align-items-center task-item'>
+						{task.label}
+						<button onClick={() => deleteTask(task.id)} className='btn ms-auto text-black text-opacity-50 border-0 task-button'><i className="fa-solid fa-x"></i></button>
 					</li>
 				))}
 			</ul>
