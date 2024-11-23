@@ -10,27 +10,27 @@ const Home = () => {
 	const [inputValue, setInputValue] = useState("");
 	const [listTasks, setListTasks] = useState([]);
 
-	// const createUser = async () => {
-	// 	const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
-	// 		method: 'POST',
-	// 		// body: JSON.stringify(dataToSend),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
-	// 		headers: {
-	// 		   'Content-Type': 'application/json'
-	// 		}
-	// 	});
-	// 	if (response.ok) {
-	// 		const data = await response.json();
-	// 		return data;
-	// 	} else {
-	// 		console.log('error: ', response.status, response.statusText);
-	// 		/* Realiza el tratamiento del error que devolvió el request HTTP */
-	// 		return {error: {status: response.status, statusText: response.statusText}};
-	// 	};
-	// };
+	const createUser = async () => {
+		const response = await fetch("https://playground.4geeks.com/todo/users/acedpool", {
+			method: 'POST',
+			// body: JSON.stringify(dataToSend),  // la variable dataToSend puede ser un 'string' o un {objeto} que proviene de algún lugar más arriba en nuestra aplicación
+			headers: {
+			   'Content-Type': 'application/json'
+			}
+		});
+		if (response.ok) {
+			const data = await response.json();
+			return data;
+		} else {
+			console.log('error: ', response.status, response.statusText);
+			/* Realiza el tratamiento del error que devolvió el request HTTP */
+			return {error: {status: response.status, statusText: response.statusText}};
+		};
+	};
 
 	const createTask = async (task) => {
 		try { 
-			console.log("task: ", task)
+			console.log("task:",task)
 			// Verificar que el task no esté vacío 
 			if (!task) { 
 				throw new Error("El task no puede estar vacío"); 
@@ -47,8 +47,9 @@ const Home = () => {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				console.log(response.json());
-				setListTasks(prevState => [...prevState, { label: task, is_done: false}]);
+				console.log(data); // respuesta del servidor con la última entrada
+				setListTasks(prevState => [...prevState, { label: data.label, is_done: data.is_done, id: data.id}]);
+				console.log(listTasks); // muestra el estado anterior a esta última entrada
 				return data;
 			} else {
 				console.log(response);
@@ -71,9 +72,7 @@ const Home = () => {
 		});
 		if (response.ok) {
 			const data = await response.json();
-			// setListTasks(data.todos);
-			console.log(data.todos);
-			console.log(listTasks);
+			setListTasks(data.todos);
 		} else {
 			console.log('error: ', response.status, response.statusText);
 			/* Realiza el tratamiento del error que devolvió el request HTTP */
@@ -82,7 +81,7 @@ const Home = () => {
 	};
 
 	useEffect(() => {
-		// createUser()
+		createUser()
 		getUserData()
 	}, [])
 
